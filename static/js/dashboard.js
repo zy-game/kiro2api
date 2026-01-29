@@ -151,23 +151,62 @@ class TokenDashboard {
      * 工具方法 - 状态判断 (KISS原则)
      */
     getStatusClass(token) {
-        if (new Date(token.expires_at) < new Date()) {
-            return 'status-expired';
+        const status = token.status || '';
+        switch (status) {
+            case 'active':
+                return 'status-active';
+            case 'exhausted':
+                return 'status-exhausted';
+            case 'banned':
+                return 'status-banned';
+            case 'expired':
+                return 'status-expired';
+            case 'disabled':
+                return 'status-disabled';
+            case 'error':
+                return 'status-error';
+            default:
+                // 兼容旧逻辑
+                if (new Date(token.expires_at) < new Date()) {
+                    return 'status-expired';
+                }
+                const remaining = token.remaining_usage || 0;
+                if (remaining === 0) return 'status-exhausted';
+                if (remaining <= 5) return 'status-low';
+                return 'status-active';
         }
-        const remaining = token.remaining_usage || 0;
-        if (remaining === 0) return 'status-exhausted';
-        if (remaining <= 5) return 'status-low';
-        return 'status-active';
     }
 
     getStatusText(token) {
-        if (new Date(token.expires_at) < new Date()) {
-            return '已过期';
+        // 优先使用后端返回的状态文本
+        if (token.status_text) {
+            return token.status_text;
         }
-        const remaining = token.remaining_usage || 0;
-        if (remaining === 0) return '已耗尽';
-        if (remaining <= 5) return '即将耗尽';
-        return '正常';
+        
+        const status = token.status || '';
+        switch (status) {
+            case 'active':
+                return '可用';
+            case 'exhausted':
+                return '已耗尽';
+            case 'banned':
+                return '已封禁';
+            case 'expired':
+                return '已过期';
+            case 'disabled':
+                return '已禁用';
+            case 'error':
+                return '错误';
+            default:
+                // 兼容旧逻辑
+                if (new Date(token.expires_at) < new Date()) {
+                    return '已过期';
+                }
+                const remaining = token.remaining_usage || 0;
+                if (remaining === 0) return '已耗尽';
+                if (remaining <= 5) return '即将耗尽';
+                return '正常';
+        }
     }
 
     /**

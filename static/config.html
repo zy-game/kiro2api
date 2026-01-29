@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token配置管理 - Kiro2API</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/config.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Token配置管理</h1>
+            <p>添加、编辑和管理认证Token配置</p>
+            <a href="/" class="back-link">返回Dashboard</a>
+        </div>
+
+        <div class="controls">
+            <button class="add-btn" onclick="configManager.showAddModal()">
+                + 添加Token配置
+            </button>
+            <button class="import-btn" onclick="configManager.showImportModal()">
+                导入配置
+            </button>
+        </div>
+
+        <div class="main-card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>认证方式</th>
+                            <th>RefreshToken</th>
+                            <th>ClientID</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                                正在加载配置...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑模态框 -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加Token配置</h2>
+                <span class="close-btn" onclick="configManager.hideModal()">&times;</span>
+            </div>
+            <form id="configForm" onsubmit="return configManager.saveConfig(event)">
+                <input type="hidden" id="configIndex" value="-1">
+                
+                <div class="form-group">
+                    <label for="authType">认证方式</label>
+                    <select id="authType" required onchange="configManager.toggleIdCFields()">
+                        <option value="Social">Social</option>
+                        <option value="IdC">IdC</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="refreshToken">RefreshToken</label>
+                    <textarea id="refreshToken" required placeholder="输入RefreshToken"></textarea>
+                </div>
+
+                <div id="idcFields" class="idc-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="clientId">ClientID</label>
+                        <input type="text" id="clientId" placeholder="IdC认证的ClientID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientSecret">ClientSecret</label>
+                        <textarea id="clientSecret" placeholder="IdC认证的ClientSecret"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="disabled">
+                        <span>禁用此配置</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="configManager.hideModal()">取消</button>
+                    <button type="submit" class="save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>确认删除</h2>
+                <span class="close-btn" onclick="configManager.hideDeleteModal()">&times;</span>
+            </div>
+            <p class="delete-message">确定要删除这个Token配置吗？此操作不可恢复。</p>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="configManager.hideDeleteModal()">取消</button>
+                <button type="button" class="delete-btn" onclick="configManager.confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入配置模态框 -->
+    <div id="importModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>批量导入配置</h2>
+                <span class="close-btn" onclick="configManager.hideImportModal()">&times;</span>
+            </div>
+            <div class="import-description">
+                <p>粘贴JSON数组格式的配置，系统将自动刷新Token并获取账号信息。</p>
+                <p class="import-hint">支持格式：[{"refreshToken": "...", "clientId": "...", "clientSecret": "...", "region": "us-east-1"}]</p>
+            </div>
+            <div class="form-group">
+                <label for="importJson">JSON配置</label>
+                <textarea id="importJson" rows="10" placeholder='[
+  {
+    "refreshToken": "aor...",
+    "clientId": "xxx",
+    "clientSecret": "eyJ...",
+    "region": "us-east-1"
+  }
+]'></textarea>
+            </div>
+            <div id="importResults" class="import-results" style="display: none;"></div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="configManager.hideImportModal()">取消</button>
+                <button type="button" class="save-btn" id="importBtn" onclick="configManager.importConfigs()">开始导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/config.js"></script>
+</body>
+</html>

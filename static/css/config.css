@@ -1,0 +1,455 @@
+/* Token配置管理页面样式 */
+
+.back-link {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: white;
+}
+
+.add-btn {
+    background: rgba(76, 175, 80, 0.8);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+    background: rgba(76, 175, 80, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.action-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.action-btn.edit-btn:hover {
+    background: rgba(33, 150, 243, 0.8);
+}
+
+.action-btn.delete-btn:hover {
+    background: rgba(244, 67, 54, 0.8);
+}
+
+.token-mask {
+    font-family: 'Courier New', monospace;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.modal-small {
+    max-width: 400px;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-header h2 {
+    color: white;
+    font-weight: 500;
+    font-size: 1.3rem;
+}
+
+.close-btn {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: white;
+}
+
+/* 表单样式 */
+#configForm {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.15);
+}
+
+.form-group select option {
+    background: #667eea;
+    color: white;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.idc-fields {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    margin-top: 10px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.cancel-btn,
+.save-btn,
+.delete-btn {
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.cancel-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.cancel-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.save-btn {
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+}
+
+.save-btn:hover {
+    background: rgba(76, 175, 80, 1);
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: rgba(244, 67, 54, 1);
+}
+
+.delete-message {
+    color: rgba(255,255,255,0.9);
+    padding: 20px 25px;
+    text-align: center;
+}
+
+/* 状态标签 */
+.status-enabled {
+    background: rgba(76, 175, 80, 0.8);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.status-disabled {
+    background: rgba(158, 158, 158, 0.8);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+/* 导入按钮 */
+.import-btn {
+    background: rgba(33, 150, 243, 0.8);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+.import-btn:hover {
+    background: rgba(33, 150, 243, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* 导入模态框 */
+.modal-large {
+    max-width: 700px;
+}
+
+.import-description {
+    padding: 15px 25px;
+    color: rgba(255,255,255,0.9);
+}
+
+.import-description p {
+    margin-bottom: 8px;
+}
+
+.import-hint {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    word-break: break-all;
+}
+
+#importModal .form-group {
+    padding: 0 25px;
+}
+
+#importJson {
+    min-height: 200px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+#importModal .form-actions {
+    padding: 20px 25px;
+    margin-top: 0;
+}
+
+/* 导入结果 */
+.import-results {
+    padding: 15px 25px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.import-progress {
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    padding: 20px;
+}
+
+.import-error {
+    color: #ff5252;
+    background: rgba(244, 67, 54, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.import-summary {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.summary-total {
+    color: rgba(255,255,255,0.9);
+}
+
+.summary-success {
+    color: #4caf50;
+}
+
+.summary-failed {
+    color: #ff5252;
+}
+
+.import-details {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.import-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.result-success {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.result-banned {
+    background: rgba(255, 152, 0, 0.2);
+    border: 1px solid rgba(255, 152, 0, 0.4);
+}
+
+.result-error {
+    background: rgba(244, 67, 54, 0.2);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+}
+
+.result-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.result-success .result-icon {
+    color: #4caf50;
+}
+
+.result-banned .result-icon {
+    color: #ff9800;
+}
+
+.result-error .result-icon {
+    color: #ff5252;
+}
+
+.result-index {
+    color: rgba(255,255,255,0.7);
+    min-width: 30px;
+}
+
+.result-email {
+    color: rgba(255,255,255,0.9);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-message {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+}

@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+// AccountStatus 账号状态常量
+const (
+	AccountStatusActive    = "active"    // 可用
+	AccountStatusExhausted = "exhausted" // 已耗完
+	AccountStatusBanned    = "banned"    // 封禁
+	AccountStatusExpired   = "expired"   // 已过期
+	AccountStatusDisabled  = "disabled"  // 已禁用
+	AccountStatusError     = "error"     // 错误
+)
+
 // UsageLimits 使用限制响应结构 (基于token.md中的API规范)
 type UsageLimits struct {
 	Limits               []any            `json:"limits"`
@@ -35,6 +45,7 @@ type UsageBreakdown struct {
 	CurrentOverages              int            `json:"currentOverages"`
 	CurrentOveragesWithPrecision float64        `json:"currentOveragesWithPrecision"`
 	FreeTrialInfo                *FreeTrialInfo `json:"freeTrialInfo,omitempty"`
+	Bonuses                      []BonusInfo    `json:"bonuses,omitempty"`
 	DisplayName                  string         `json:"displayName"`
 	DisplayNamePlural            string         `json:"displayNamePlural"`
 }
@@ -47,6 +58,16 @@ type FreeTrialInfo struct {
 	UsageLimitWithPrecision   float64 `json:"usageLimitWithPrecision"`
 	CurrentUsage              int     `json:"currentUsage"`
 	CurrentUsageWithPrecision float64 `json:"currentUsageWithPrecision"`
+}
+
+// BonusInfo 奖励额度信息
+type BonusInfo struct {
+	BonusCode    string  `json:"bonusCode,omitempty"`
+	DisplayName  string  `json:"displayName,omitempty"`
+	UsageLimit   float64 `json:"usageLimit"`
+	CurrentUsage float64 `json:"currentUsage"`
+	ExpiresAt    float64 `json:"expiresAt,omitempty"`
+	Status       string  `json:"status,omitempty"`
 }
 
 // UserInfo 用户信息

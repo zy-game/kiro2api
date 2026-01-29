@@ -43,9 +43,19 @@ func StartServer(port string, authToken string, authService *auth.AuthService) {
 	r.GET("/", func(c *gin.Context) {
 		c.File("./static/index.html")
 	})
+	r.GET("/config", func(c *gin.Context) {
+		c.File("./static/config.html")
+	})
 
 	// API端点 - 纯数据服务
 	r.GET("/api/tokens", handleTokenPoolAPI)
+
+	// 配置管理API端点
+	r.GET("/api/config", handleGetConfig)
+	r.POST("/api/config", handleAddConfig)
+	r.PUT("/api/config/:index", handleUpdateConfig)
+	r.DELETE("/api/config/:index", handleDeleteConfig)
+	r.POST("/api/config/import", handleImportConfig)
 
 	// GET /v1/models 端点
 	r.GET("/v1/models", func(c *gin.Context) {
@@ -255,7 +265,7 @@ func StartServer(port string, authToken string, authService *auth.AuthService) {
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key")
 
 		if c.Request.Method == "OPTIONS" {

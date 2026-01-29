@@ -43,14 +43,35 @@ func loadConfigs() ([]AuthConfig, error) {
 		}
 	}
 
-	// 只支持KIRO_AUTH_TOKEN的JSON格式（支持文件路径或JSON字符串）
+	// 优先从配置文件加载（支持Web管理界面）
+	configFilePath := os.Getenv("AUTH_CONFIG_FILE")
+	if configFilePath == "" {
+		configFilePath = "./auth_config.json"
+	}
+
+	if fileInfo, err := os.Stat(configFilePath); err == nil && !fileInfo.IsDir() {
+		content, err := os.ReadFile(configFilePath)
+		if err == nil && len(content) > 2 { // 至少包含 "[]"
+			configs, err := parseJSONConfig(string(content))
+			if err == nil && len(configs) > 0 {
+				validConfigs := processConfigs(configs)
+				if len(validConfigs) > 0 {
+					logger.Info("从配置文件加载认证配置",
+						logger.String("文件路径", configFilePath),
+						logger.Int("有效配置数", len(validConfigs)))
+					return validConfigs, nil
+				}
+			}
+		}
+	}
+
+	// 回退到KIRO_AUTH_TOKEN环境变量
 	jsonData := os.Getenv("KIRO_AUTH_TOKEN")
 	if jsonData == "" {
-		return nil, fmt.Errorf("未找到KIRO_AUTH_TOKEN环境变量\n" +
-			"请设置: KIRO_AUTH_TOKEN='[{\"auth\":\"Social\",\"refreshToken\":\"your_token\"}]'\n" +
-			"或设置为配置文件路径: KIRO_AUTH_TOKEN=/path/to/config.json\n" +
-			"支持的认证方式: Social, IdC\n" +
-			"详细配置请参考: .env.example")
+		return nil, fmt.Errorf("未找到有效的认证配置\n" +
+			"请通过Web界面添加配置: http://localhost:8080/config\n" +
+			"或设置环境变量: KIRO_AUTH_TOKEN='[{\"auth\":\"Social\",\"refreshToken\":\"your_token\"}]'\n" +
+			"支持的认证方式: Social, IdC")
 	}
 
 	// 优先尝试从文件加载，失败后再作为JSON字符串处理

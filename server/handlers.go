@@ -527,7 +527,8 @@ func handleTokenPoolAPI(c *gin.Context) {
 				"remaining_usage": 0,
 				"expires_at":      time.Now().Add(time.Hour).Format(time.RFC3339),
 				"last_used":       "未知",
-				"status":          "disabled",
+				"status":          types.AccountStatusDisabled,
+				"status_text":     "已禁用",
 				"error":           "配置已禁用",
 			}
 			tokenList = append(tokenList, tokenData)
@@ -545,73 +546,90 @@ func handleTokenPoolAPI(c *gin.Context) {
 				"remaining_usage": 0,
 				"expires_at":      time.Now().Add(time.Hour).Format(time.RFC3339),
 				"last_used":       "未知",
-				"status":          "error",
+				"status":          types.AccountStatusError,
+				"status_text":     "错误",
 				"error":           err.Error(),
 			}
 			tokenList = append(tokenList, tokenData)
 			continue
 		}
 
-		// 检查使用限制
-		var usageInfo *types.UsageLimits
-		var available float64 // 默认值 (浮点数)
-		var userEmail = "未知用户"
-
-		checker := auth.NewUsageLimitsChecker()
-		if usage, checkErr := checker.CheckUsageLimits(tokenInfo); checkErr == nil {
-			usageInfo = usage
-			available = auth.CalculateAvailableCount(usage)
-
-			// 提取用户邮箱
-			if usage.UserInfo.Email != "" {
-				userEmail = usage.UserInfo.Email
+		// 检查token是否过期
+		if tokenInfo.IsExpired() {
+			tokenData := map[string]any{
+				"index":           i,
+				"user_email":      "已过期",
+				"token_preview":   createTokenPreview(tokenInfo.AccessToken),
+				"auth_type":       strings.ToLower(authConfig.AuthType),
+				"remaining_usage": 0,
+				"expires_at":      tokenInfo.ExpiresAt.Format(time.RFC3339),
+				"last_used":       "未知",
+				"status":          types.AccountStatusExpired,
+				"status_text":     "已过期",
+				"error":           "Token已过期",
 			}
+			tokenList = append(tokenList, tokenData)
+			continue
+		}
+
+		// 使用新的用量检查方法
+		checker := auth.NewUsageLimitsChecker()
+		usageResult := checker.CheckUsageLimitsWithStatus(tokenInfo)
+
+		// 提取用户邮箱
+		var userEmail = "未知用户"
+		if usageResult.UsageLimits != nil && usageResult.UsageLimits.UserInfo.Email != "" {
+			userEmail = usageResult.UsageLimits.UserInfo.Email
 		}
 
 		// 构建token数据
 		tokenData := map[string]any{
 			"index":           i,
-			"user_email":      maskEmail(userEmail), // 对邮箱进行脱敏处理
+			"user_email":      maskEmail(userEmail),
 			"token_preview":   createTokenPreview(tokenInfo.AccessToken),
 			"auth_type":       strings.ToLower(authConfig.AuthType),
-			"remaining_usage": available,
+			"remaining_usage": usageResult.Available,
 			"expires_at":      tokenInfo.ExpiresAt.Format(time.RFC3339),
 			"last_used":       time.Now().Format(time.RFC3339),
-			"status":          "active",
+			"status":          usageResult.Status,
 		}
 
-		// 添加使用限制详细信息 (基于CREDIT资源类型)
-		if usageInfo != nil {
-			for _, breakdown := range usageInfo.UsageBreakdownList {
-				if breakdown.ResourceType == "CREDIT" {
-					var totalLimit float64
-					var totalUsed float64
+		// 根据状态设置状态文本和错误信息
+		switch usageResult.Status {
+		case types.AccountStatusActive:
+			tokenData["status_text"] = "可用"
+			activeCount++
+		case types.AccountStatusExhausted:
+			tokenData["status_text"] = "已耗尽"
+		case types.AccountStatusBanned:
+			tokenData["status_text"] = "已封禁"
+			tokenData["error"] = usageResult.BanReason
+			tokenData["ban_reason"] = usageResult.BanReason
+		case types.AccountStatusError:
+			tokenData["status_text"] = "错误"
+			if usageResult.Error != nil {
+				tokenData["error"] = usageResult.Error.Error()
+			}
+		default:
+			tokenData["status_text"] = "未知"
+		}
 
-					// 基础额度
-					totalLimit += breakdown.UsageLimitWithPrecision
-					totalUsed += breakdown.CurrentUsageWithPrecision
+		// 添加使用限制详细信息
+		if usageResult.UsageLimits != nil {
+			tokenData["usage_limits"] = map[string]any{
+				"total_limit":   usageResult.TotalLimit,
+				"current_usage": usageResult.TotalUsed,
+				"available":     usageResult.Available,
+				"is_exceeded":   usageResult.Available <= 0,
+			}
 
-					// 免费试用额度
-					if breakdown.FreeTrialInfo != nil && breakdown.FreeTrialInfo.FreeTrialStatus == "ACTIVE" {
-						totalLimit += breakdown.FreeTrialInfo.UsageLimitWithPrecision
-						totalUsed += breakdown.FreeTrialInfo.CurrentUsageWithPrecision
-					}
-
-					tokenData["usage_limits"] = map[string]any{
-						"total_limit":   totalLimit, // 保留浮点精度
-						"current_usage": totalUsed,  // 保留浮点精度
-						"is_exceeded":   available <= 0,
-					}
-					break
+			// 添加订阅信息
+			if usageResult.UsageLimits.SubscriptionInfo.Type != "" {
+				tokenData["subscription"] = map[string]any{
+					"type":  usageResult.UsageLimits.SubscriptionInfo.Type,
+					"title": usageResult.UsageLimits.SubscriptionInfo.SubscriptionTitle,
 				}
 			}
-		}
-
-		// 如果token不可用，标记状态
-		if available <= 0 {
-			tokenData["status"] = "exhausted"
-		} else {
-			activeCount++
 		}
 
 		// 如果是 IdC 认证，显示额外信息
